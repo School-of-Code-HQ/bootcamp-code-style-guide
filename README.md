@@ -6,15 +6,121 @@ A comprehensive guide for writing clean, maintainable JavaScript code, with a fo
 
 ## Table of Contents
 
-1. [Code Organization](#code-organization)
-1. [Variables and Naming](#variables-and-naming)
-1. [Semi-colons and Syntax](#semi-colons-and-syntax)
-1. [Functions](#functions)
-1. [Objects and Arrays](#objects-and-arrays)
-1. [Conditionals and Loops](#conditionals-and-loops)
-1. [Error Handling](#error-handling)
-1. [Common Bugs and Pitfalls](#common-bugs-and-pitfalls)
-1. [Debugging](#debugging)
+- [JavaScript Coding Standards Guide](#javascript-coding-standards-guide)
+  - [DRY (Don’t Repeat Yourself)](#dry-dont-repeat-yourself)
+    - [Extract Reusable Code](#extract-reusable-code)
+- [Code Organization](#code-organization)
+- [Variables and Naming](#variables-and-naming)
+  - [Variable Declarations](#variable-declarations)
+  - [Naming Conventions](#naming-conventions)
+- [Semi-colons and Syntax](#semi-colons-and-syntax)
+  - [Spacing and Indentation](#spacing-and-indentation)
+- [Functions](#functions)
+- [Objects and Arrays](#objects-and-arrays)
+  - [Object Creation and Access](#object-creation-and-access)
+  - [Default Values](#default-values)
+  - [Array Operations](#array-operations)
+  - [Trailing Commas](#trailing-commas)
+- [Conditionals and Loops](#conditionals-and-loops)
+  - [Clean Conditionals](#clean-conditionals)
+  - [Modern Loop Approaches](#modern-loop-approaches)
+- [Error Handling](#error-handling)
+- [Common Bugs and Pitfalls](#common-bugs-and-pitfalls)
+  - [Strict Equality](#strict-equality)
+  - [Reference vs Copy](#reference-vs-copy)
+  - [Variable Scope](#variable-scope)
+- [Debugging](#debugging)
+- [Best Practices with APIs and Express.js](#best-practices-with-apis-and-expressjs)
+  - [Planning](#planning)
+  - [Project Structure](#project-structure)
+  - [Example `userModel.js`](#example-usermodeljs)
+  - [Example `userController.js`](#example-usercontrollerjs)
+  - [Example `userRoutes.js`](#example-userroutesjs)
+  - [package.json](#packagejson)
+  - [Example `app.js`](#example-appjs)
+  - [Example `server.js`](#example-serverjs)
+  - [Security Best Practices](#security-best-practices)
+  - [RESTful API Design](#restful-api-design)
+    - [Use HTTP Methods Correctly](#use-http-methods-correctly)
+    - [Use Meaningful URIs](#use-meaningful-uris)
+    - [Return Appropriate Status Codes](#return-appropriate-status-codes)
+    - [Keep Your API Consistent](#keep-your-api-consistent)
+    - [Use Versioning to Manage Changes](#use-versioning-to-manage-changes)
+    - [Document Your API](#document-your-api)
+    - [Use Query Parameters for Filtering, Sorting, and Searching](#use-query-parameters-for-filtering-sorting-and-searching)
+- [Summary and Tools](#summary-and-tools)
+
+## DRY (Don’t Repeat Yourself)
+
+**Goal:** Avoid duplicating code to make your codebase easier to maintain and less error-prone.
+
+### Extract Reusable Code
+
+**Goal:** Simplify your code by extracting hard-coded values and repeated logic into variables and functions.
+
+#### Example
+
+Consider the following code with hard-coded values and repeated logic:
+
+```javascript
+// Start
+function calculateDiscount(price) {
+    if (price > 100) {
+        return price * 0.1;
+    } else {
+        return price * 0.05;
+    }
+}
+
+function applyDiscount(price) {
+    if (price > 100) {
+        const discount = price * 0.1;
+        return price - discount;
+    } else {
+        const discount = price * 0.05;
+        return price - discount;
+    }
+}
+
+const discountedPrice1 = applyDiscount(120);
+const discountedPrice2 = applyDiscount(80);
+const discountedPrice3 = applyDiscount(150);
+const discountedPrice4 = applyDiscount(50);
+```
+
+**Improved Version:**
+
+1. Extract hard-coded values into variables.
+2. Extract repeated logic into reusable functions.
+
+```javascript
+// Better
+const HIGH_PRICE_THRESHOLD = 100;
+const HIGH_PRICE_DISCOUNT_RATE = 0.1;
+const LOW_PRICE_DISCOUNT_RATE = 0.05;
+
+function getDiscountRate(price) {
+    if (price > HIGH_PRICE_THRESHOLD) {
+        return HIGH_PRICE_DISCOUNT_RATE;
+    } 
+    return LOW_PRICE_DISCOUNT_RATE;
+}
+
+function calculateDiscount(price) {
+    const discountRate = getDiscountRate(price);
+    return price * discountRate;
+}
+
+function applyDiscount(price) {
+    const discount = calculateDiscount(price);
+    return price - discount;
+}
+
+const discountedPrice1 = applyDiscount(120);
+const discountedPrice2 = applyDiscount(80);
+```
+
+**Why this helps:** By extracting hard-coded values and repeated logic, your code becomes more maintainable and easier to understand. Changes to discount rates or thresholds can be made in one place, reducing the risk of errors.
 
 ## Code Organization
 
@@ -71,8 +177,8 @@ export default processUserData;
 
 ### Variable Declarations
 
-- Use `const` for values that never change.
-- Use `let` for values that will change.
+- Use `const` for variables that never need to be reassigned.
+- Use `let` for values that will be reassigned.
 - Avoid `var` as it can create confusing scoping issues.
 
 **Examples:**
@@ -446,6 +552,393 @@ console.table(users);
 ```
 
 **Why this helps:** Good debugging practices let you quickly pinpoint issues without guesswork.
+
+## Best Practices with APIs and Express.js
+
+**Goal:** Write clean, maintainable, and secure Express.js applications.
+
+### Planning
+
+Before you start coding, plan your API endpoints, request/response bodies, and status codes. A table like the following is really helpful as a starting point.
+
+| HTTP Method | Endpoint         | Description                          | Request Body         | Response Body       | Status Codes                  |
+|-------------|------------------|--------------------------------------|----------------------|---------------------|-------------------------------|
+| GET         | /api/users       | Retrieve all users                   | None                 | Array of users      | 200 OK, 500 Internal Server Error |
+| POST        | /api/users       | Create a new user                    | JSON user object     | Created user object | 201 Created, 500 Internal Server Error |
+| GET         | /api/users/:id   | Retrieve user with specific ID       | None                 | User object         | 200 OK, 404 Not Found, 500 Internal Server Error |
+| PUT         | /api/users/:id   | Update user with specific ID         | JSON user object     | Updated user object | 200 OK, 404 Not Found, 500 Internal Server Error |
+| PATCH       | /api/users/:id   | Partially update user with specific ID | JSON user object     | Updated user object | 200 OK, 404 Not Found, 500 Internal Server Error |
+| DELETE      | /api/users/:id   | Delete user with specific ID         | None                 | None                | 204 No Content, 404 Not Found, 500 Internal Server Error |
+
+**Note:** Ensure to handle errors gracefully and return appropriate status codes for each endpoint.
+
+### Project Structure
+
+Organize your project files to separate concerns and improve maintainability.
+
+**Example Structure:**
+
+```file-tree
+/project-root
+    /controllers
+        userController.js
+    /models
+        userModel.js
+    /routes
+        userRoutes.js
+    /middlewares
+        authMiddleware.js
+    app.js
+    server.js
+```
+
+### Example `userModel.js`
+
+Define your user model by reading from and writing to a JSON file using the Node.js file system module.
+
+```javascript
+import fs from "node:fs/promises";
+import path from "path";
+
+const fileName = "users.json";
+
+async function getUsers() {
+    try {
+        const data = await fs.readFile(filePath, "utf8");
+        return JSON.parse(data);
+    } catch (error) {
+        console.error("Error reading users file:", error);
+        throw error;
+    }
+}
+
+async function setUsers(users) {
+    try {
+        const data = JSON.stringify(users, null, 2);
+        await fs.writeFile(filePath, data, "utf8");
+    } catch (error) {
+        console.error("Error writing users file:", error);
+        throw error;
+    }
+}
+
+export { getUsers, setUsers };
+```
+
+**Why this helps:** Reading from and writing to a JSON file can be useful for simple data storage and retrieval in small projects or for initial prototyping.
+
+### Example `userController.js`
+
+Define your controller to handle model-related logic.
+
+```javascript
+import { getUsers, setUsers } from "../models/userModel.js";
+
+async function readAllUsers() {
+  const users = await getUsers();
+  return users;
+}
+
+async function createUser(newUser) {
+  const users = await getUsers();
+  users.push(newUser);
+  await setUsers(users);
+  return newUser;
+}
+
+// ... more controller functions
+
+export { readAllUsers, createUser };
+```
+
+### Example `userRoutes.js`
+
+Define routes in separate files to keep your code organized.
+
+```javascript
+import express from "express";
+import {
+  readAllUsers,
+  createUser,
+  updateUser,
+  partiallyUpdateUser,
+  deleteUser,
+} from "../controllers/userController.js";
+
+const router = express.Router();
+
+router.get("/users", async function (req, res) {
+  try {
+    const users = await readAllUsers();
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.post("/users", async function (req, res) {
+  try {
+    const newUser = await createUser(req.body);
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error("Error creating user:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.put("/users/:id", async function (req, res) {
+  try {
+    const updatedUser = await updateUser(req.params.id, req.body);
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.patch("/users/:id", async function (req, res) {
+  try {
+    const updatedUser = await partiallyUpdateUser(req.params.id, req.body);
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error partially updating user:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.delete("/users/:id", async function (req, res) {
+  try {
+    const deletedUser = await deleteUser(req.params.id);
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+export default router;
+```
+
+**Why this helps:** Following these best practices ensures your Express.js applications are secure, maintainable, and scalable.
+
+### package.json
+
+Ensure your `package.json` includes `"type": "module"` to enable ESModules syntax. It will also need to have the scripts specified, such as `"start": "node server.js"` and `"dev": "node --watch server.js"` (as well as any other scripts you need).
+
+```json
+{
+    "type": "module",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "node --watch server.js"
+    }
+}
+```
+
+### Example `app.js`
+
+`app.js` should handle middleware setup and route registration. Separating this logic from `server.js` keeps your codebase clean, and makes this file easier to test.
+
+```javascript
+import express from 'express';
+import userRoutes from './routes/userRoutes.js';
+
+const app = express();
+
+app.use(express.json());
+app.use('/api', userRoutes);
+
+export default app;
+```
+
+### Example `server.js`
+
+`server.js` should start the Express.js server. This separation of concerns keeps your codebase organized and easy to maintain. Sometimes this might be in a separate `bin/www.js` file by convention instead.
+
+```javascript
+import app from './app.js';
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+```
+
+### Security Best Practices
+
+- Use `helmet` to set secure HTTP headers.
+- Sanitize user input to prevent injection attacks.
+- Use HTTPS to encrypt data in transit.
+
+**Example:**
+
+```javascript
+import helmet from 'helmet';
+app.use(helmet());
+```
+
+### RESTful API Design
+
+**Goal:** Design APIs that are intuitive, consistent, and easy to use.
+
+#### Use HTTP Methods Correctly
+
+- **GET:** Retrieve data.
+- **POST:** Create new resources.
+- **PUT:** Update existing resources.
+- **PATCH:** Partially update existing resources.
+- **DELETE:** Remove resources.
+
+**Example:**
+
+```http
+GET /api/users        // Retrieve all users
+POST /api/users       // Create a new user
+GET /api/users/1      // Retrieve user with ID 1
+PUT /api/users/1      // Update user with ID 1
+PATCH /api/users/1    // Partially update user with ID 1
+DELETE /api/users/1   // Delete user with ID 1
+```
+
+#### Use Meaningful URIs
+
+- Use nouns to represent resources.
+- Avoid verbs in URIs.
+
+**Example:**
+
+```http
+GET /api/products        // Good
+GET /api/getProducts     // Bad
+```
+
+#### Return Appropriate Status Codes
+
+- **200 OK:** Successful GET, PUT, PATCH, DELETE.
+- **201 Created:** Successful POST.
+- **204 No Content:** Successful DELETE with no response body.
+- **400 Bad Request:** Invalid request.
+- **404 Not Found:** Resource not found.
+- **500 Internal Server Error:** Server error.
+
+**Example:**
+
+```javascript
+app.get('/api/users/:id', async (req, res) => {
+    try {
+        const user = await getUserById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+```
+
+#### Keep Your API Consistent
+
+- Use consistent naming conventions.
+- Follow a consistent structure for endpoints.
+
+**Example:**
+
+```http
+GET /api/users
+GET /api/users/:id
+POST /api/users
+PUT /api/users/:id
+DELETE /api/users/:id
+```
+
+#### Use Versioning to Manage Changes
+
+- Include version numbers in your URIs.
+
+**Example:**
+
+```http
+/api/v1/users
+/api/v2/users
+```
+
+```javascript
+app.use('/api/v1/users', usersRouterV1);
+app.get('/api/v2/users', usersRouterV2);
+```
+
+**Why this helps:** Versioning your API allows you to introduce changes without breaking existing clients. It provides a clear path for upgrading and maintaining your API over time.
+
+#### Document Your API
+
+- Use tools like Swagger or Postman to document your API.
+- Provide clear examples and descriptions.
+
+**Example:**
+
+```yaml
+openapi: 3.0.0
+info:
+  title: User API
+  version: 1.0.0
+paths:
+  /api/users:
+    get:
+      summary: Retrieve all users
+      responses:
+        '200':
+          description: A list of users
+```
+
+#### Use Query Parameters for Filtering, Sorting, and Searching
+
+- Use query parameters to refine results.
+
+**Example:**
+
+```http
+GET /api/users?age=30&sort=name
+```
+
+```javascript
+router.get('/users', async function (req, res) {
+    try {
+        const { age, sort } = req.query;
+        let users = await readAllUsers();
+
+        if (age) {
+            users = users.filter(user => user.age === parseInt(age, 10));
+        }
+
+        if (sort) {
+            users.sort((a, b) => {
+                if (a[sort] < b[sort]) return -1;
+                if (a[sort] > b[sort]) return 1;
+                return 0;
+            });
+        }
+
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+```
+
+**Why this helps:** Following these best practices ensures your API is easy to understand, use, and maintain.
 
 ## Summary and Tools
 
