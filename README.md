@@ -305,6 +305,33 @@ function updateUserProfile(userId, newData) {
 
 **Why this helps:** Smaller, well-named functions are easier to understand, test, and reuse. It’s simpler to fix or improve parts of your code without breaking something else.
 
+### Prefer Functions Returning Values
+
+- Functions that return values are easier to test and reuse.
+- Avoid side effects (modifying external state) in functions.
+
+```javascript
+// Bad - side effect
+function updateName(user, newName) {
+    user.name = newName;
+}
+
+// Good - return new value
+function updateName(user, newName) {
+    const updatedUser = {};
+    for (let key in user) {
+        updatedUser[key] = user[key];
+    }
+    updatedUser.name = newName;
+    return updatedUser;
+}
+
+// Better - spread syntax
+function updateName(user, newName) {
+    return { ...user, name: newName };
+}
+```
+
 ## Objects and Arrays
 
 **Goal:** Use clean, modern patterns for data structures.
