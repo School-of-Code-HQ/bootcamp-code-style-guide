@@ -940,6 +940,13 @@ router.get('/users', async function (req, res) {
 
 **Why this helps:** Following these best practices ensures your API is easy to understand, use, and maintain.
 
+### Look at the other RESTful API design best practices
+
+There's well established best practices for RESTful API design, but it's mainly about choice and convention. It's much better to stick to convention, be predictable, and ensure you're well documented than it is to be the opposite - custom, unpredictable, and undocumented. Here's some resources to explore more about REST:
+
+- [REST APIs](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design) for a comprehensive guide.
+- [RESTful API Design Best Practices](https://restfulapi.net/) for more information.
+
 ## Summary and Tools
 
 - **Consistency is Key:** Whichever conventions you pick, apply them consistently.
