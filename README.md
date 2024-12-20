@@ -7,47 +7,18 @@ A comprehensive guide for writing clean, maintainable JavaScript code, with a fo
 ## Table of Contents
 
 - [JavaScript Coding Standards Guide](#javascript-coding-standards-guide)
-  - [DRY (Don’t Repeat Yourself)](#dry-dont-repeat-yourself)
-    - [Extract Reusable Code](#extract-reusable-code)
+- [DRY (Don’t Repeat Yourself)](#dry-dont-repeat-yourself)
 - [Code Organization](#code-organization)
 - [Variables and Naming](#variables-and-naming)
-  - [Variable Declarations](#variable-declarations)
-  - [Naming Conventions](#naming-conventions)
 - [Semi-colons and Syntax](#semi-colons-and-syntax)
-  - [Spacing and Indentation](#spacing-and-indentation)
 - [Functions](#functions)
 - [Objects and Arrays](#objects-and-arrays)
-  - [Object Creation and Access](#object-creation-and-access)
-  - [Default Values](#default-values)
-  - [Array Operations](#array-operations)
-  - [Trailing Commas](#trailing-commas)
 - [Conditionals and Loops](#conditionals-and-loops)
-  - [Clean Conditionals](#clean-conditionals)
-  - [Modern Loop Approaches](#modern-loop-approaches)
 - [Error Handling](#error-handling)
+- [Asynchronous Code](#asynchronous-code)
 - [Common Bugs and Pitfalls](#common-bugs-and-pitfalls)
-  - [Strict Equality](#strict-equality)
-  - [Reference vs Copy](#reference-vs-copy)
-  - [Variable Scope](#variable-scope)
 - [Debugging](#debugging)
 - [Best Practices with APIs and Express.js](#best-practices-with-apis-and-expressjs)
-  - [Planning](#planning)
-  - [Project Structure](#project-structure)
-  - [Example `userModel.js`](#example-usermodeljs)
-  - [Example `userController.js`](#example-usercontrollerjs)
-  - [Example `userRoutes.js`](#example-userroutesjs)
-  - [package.json](#packagejson)
-  - [Example `app.js`](#example-appjs)
-  - [Example `server.js`](#example-serverjs)
-  - [Security Best Practices](#security-best-practices)
-  - [RESTful API Design](#restful-api-design)
-    - [Use HTTP Methods Correctly](#use-http-methods-correctly)
-    - [Use Meaningful URIs](#use-meaningful-uris)
-    - [Return Appropriate Status Codes](#return-appropriate-status-codes)
-    - [Keep Your API Consistent](#keep-your-api-consistent)
-    - [Use Versioning to Manage Changes](#use-versioning-to-manage-changes)
-    - [Document Your API](#document-your-api)
-    - [Use Query Parameters for Filtering, Sorting, and Searching](#use-query-parameters-for-filtering-sorting-and-searching)
 - [Summary and Tools](#summary-and-tools)
 
 ## DRY (Don’t Repeat Yourself)
@@ -487,6 +458,120 @@ function parseJSON(str) {
 ```
 
 **Why this helps:** Good error handling makes your code more resilient, easier to debug, and more reliable in production.
+
+### Asynchronous Code
+
+**Goal:** Write asynchronous code that is easy to read and maintain.
+
+#### Callbacks and Callback Hell
+
+**Example:**
+
+```javascript
+// Callback Hell
+function getData(callback) {
+    setTimeout(() => {
+        callback(null, 'data');
+    }, 1000);
+}
+
+function processData(data, callback) {
+    setTimeout(() => {
+        callback(null, `processed ${data}`);
+    }, 1000);
+}
+
+function saveData(data, callback) {
+    setTimeout(() => {
+        callback(null, `saved ${data}`);
+    }, 1000);
+}
+
+getData((err, data) => {
+    if (err) {
+        console.error(err);
+        return;
+    }
+    processData(data, (err, processedData) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        saveData(processedData, (err, savedData) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            console.log(savedData);
+        });
+    });
+});
+```
+
+**Why this is bad:** Callback hell makes code difficult to read, understand, and maintain. It’s easy to introduce bugs and hard to debug.
+
+#### Promises and `.then`
+
+**Example:**
+
+```javascript
+// Promises
+function getData() {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve('data');
+        }, 1000);
+    });
+}
+
+function processData(data) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(`processed ${data}`);
+        }, 1000);
+    });
+}
+
+function saveData(data) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(`saved ${data}`);
+        }, 1000);
+    });
+}
+
+getData()
+    .then(data => processData(data))
+    .then(processedData => saveData(processedData))
+    .then(savedData => console.log(savedData))
+    .catch(err => console.error(err));
+```
+
+**Why this is better:** Promises flatten the structure of asynchronous code, making it more readable and easier to manage. However, chaining `.then` can still become unwieldy for complex sequences.
+
+#### Async/Await
+
+**Example:**
+
+```javascript
+// Async/Await
+async function handleData() {
+    try {
+        const data = await getData();
+        const processedData = await processData(data);
+        const savedData = await saveData(processedData);
+        console.log(savedData);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+handleData();
+```
+
+**Why this is best:** `async/await` syntax makes asynchronous code look and behave more like synchronous code, which is easier to read and understand. It also simplifies error handling with `try/catch` blocks.
+
+**Why this helps:** Using `async/await` improves code readability and maintainability, making it the recommended approach for handling asynchronous operations in modern JavaScript.
 
 ## Common Bugs and Pitfalls
 
